@@ -72,7 +72,7 @@ export const config = {
   },
   searx: {
     inputQuery: ["input[name='q']"],
-    sidebarContainerQuery: ['#sidebar_results'],
+    sidebarContainerQuery: ['#sidebar','#sidebar_results'],
     appendContainerQuery: [],
   },
 }
