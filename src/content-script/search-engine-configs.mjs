@@ -4,7 +4,6 @@
  * @property {string[]} sidebarContainerQuery - prepend child to
  * @property {string[]} appendContainerQuery - if sidebarContainer not exists, append child to
  */
-
 /**
  * @type {Object.<string,SiteConfig>}
  */
@@ -71,6 +70,11 @@ export const config = {
     appendContainerQuery: [],
   },
   searx: {
+    inputQuery: ["input[name='q']"],
+    sidebarContainerQuery: ['#sidebar','#sidebar_results'],
+    appendContainerQuery: [],
+  },
+  search: {
     inputQuery: ["input[name='q']"],
     sidebarContainerQuery: ['#sidebar','#sidebar_results'],
     appendContainerQuery: [],
