@@ -1,3 +1,6 @@
+@import 'light.scss';
+@import 'dark.scss';
+
 @keyframes gpt-pulse {
   0%,
   100% {
@@ -20,16 +23,6 @@
     height: fit-content;
   }
 
-  @media (prefers-color-scheme: light) {
-    border-color: #dadce0;
-    background-color: white;
-  }
-
-  @media (prefers-color-scheme: dark) {
-    border-color: #3c4043;
-    background-color: #202124;
-  }
-
   p {
     margin: 0;
   }
@@ -45,10 +38,6 @@
     gap: 6px;
   }
 
-  .manual-btn {
-    cursor: pointer;
-  }
-
   .gpt-loading {
     color: #b6b8ba;
     animation: gpt-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
@@ -61,6 +50,10 @@
 
     pre {
       margin-top: 10px;
+    }
+
+    & > p:not(:last-child) {
+      margin-bottom: 10px;
     }
 
     code {
@@ -93,15 +86,13 @@
     .gpt-header {
       display: flex;
       flex-direction: row;
-      justify-content: space-between;
+      justify-content: flex-start;
       align-items: center;
-      margin-bottom: 5px;
-
-      p {
-        font-weight: bold;
-      }
+      margin-bottom: 10px;
+      gap: 5px;
 
       .gpt-feedback {
+        margin-left: auto;
         display: flex;
         gap: 6px;
         cursor: pointer;

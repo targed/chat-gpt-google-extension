@@ -1,26 +1,35 @@
+import { GearIcon } from '@primer/octicons-react'
 import { useEffect, useState } from 'preact/hooks'
-import PropTypes from 'prop-types'
-import { memo } from 'react'
+import { memo, useCallback } from 'react'
 import ReactMarkdown from 'react-markdown'
 import rehypeHighlight from 'rehype-highlight'
 import Browser from 'webextension-polyfill'
+import { captureEvent } from '../analytics'
+import { Answer } from '../messaging'
 import ChatGPTFeedback from './ChatGPTFeedback'
-import { isBraveBrowser } from './utils.mjs'
-import './highlight.scss'
+import { isBraveBrowser, shouldShowTriggerModeTip } from './utils.js'
 
-function ChatGPTQuery(props) {
-  const [answer, setAnswer] = useState(null)
+interface Props {
+  question: string
+}
+
+function ChatGPTQuery(props: Props) {
+  const [answer, setAnswer] = useState<Answer | null>(null)
   const [error, setError] = useState('')
   const [retry, setRetry] = useState(0)
-  const [, setDone] = useState(false)
+  const [done, setDone] = useState(false)
+  const [showTip, setShowTip] = useState(false)
+  const [status, setStatus] = useState<'success' | 'error' | undefined>()
 
   useEffect(() => {
     const port = Browser.runtime.connect()
-    const listener = (msg) => {
+    const listener = (msg: any) => {
       if (msg.text) {
         setAnswer(msg)
+        setStatus('success')
       } else if (msg.error) {
         setError(msg.error)
+        setStatus('error')
       } else if (msg.event === 'DONE') {
         setDone(true)
       }
@@ -47,16 +56,41 @@ function ChatGPTQuery(props) {
     }
   }, [error])
 
+  useEffect(() => {
+    shouldShowTriggerModeTip().then((show) => setShowTip(show))
+  }, [])
+
+  useEffect(() => {
+    if (status) {
+      captureEvent('showAnswer', { status })
+    }
+  }, [props.question, status])
+
+  const openOptionsPage = useCallback(() => {
+    Browser.runtime.sendMessage({ type: 'OPEN_OPTIONS_PAGE' })
+  }, [])
+
   if (answer) {
     return (
       <div id="answer" className="markdown-body gpt-inner" dir="auto">
         <div className="gpt-header">
-          <p>ChatGPT</p>
+          <span className="font-bold">ChatGPT</span>
+          <span className="cursor-pointer leading-[0]" onClick={openOptionsPage}>
+            <GearIcon size={14} />
+          </span>
           <ChatGPTFeedback messageId={answer.messageId} conversationId={answer.conversationId} />
         </div>
         <ReactMarkdown rehypePlugins={[[rehypeHighlight, { detect: true }]]}>
           {answer.text}
         </ReactMarkdown>
+        {done && showTip && (
+          <p className="italic mt-2">
+            Tip: you can switch to manual trigger mode in{' '}
+            <span className="underline cursor-pointer" onClick={openOptionsPage}>
+              extension settings
+            </span>
+          </p>
+        )}
       </div>
     )
   }
@@ -90,10 +124,6 @@ function ChatGPTQuery(props) {
   }
 
   return <p className="gpt-loading gpt-inner">Waiting for ChatGPT response...</p>
-}
-
-ChatGPTQuery.propTypes = {
-  question: PropTypes.string.isRequired,
 }
 
 export default memo(ChatGPTQuery)

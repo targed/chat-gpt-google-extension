@@ -1,7 +1,7 @@
 {
   "name": "ChatGPT for Google",
   "description": "Display ChatGPT response alongside Google Search results",
-  "version": "1.9.1",
+  "version": "1.11.5",
   "manifest_version": 2,
   "icons": {
     "16": "logo.png",
@@ -13,8 +13,10 @@
   "background": {
     "scripts": ["background.js"]
   },
-  "browser_action": {
-    "default_popup": "popup.html"
+  "browser_action": {},
+  "options_ui": {
+    "page": "options.html",
+    "open_in_tab": true
   },
   "content_scripts": [
     {
