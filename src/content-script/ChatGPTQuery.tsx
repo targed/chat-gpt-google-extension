@@ -61,7 +61,7 @@ function ChatGPTQuery(props: Props) {
   }, [])
 
   useEffect(() => {
-    if (status) {
+    if (status === 'success') {
       captureEvent('showAnswer', { status })
     }
   }, [props.question, status])
@@ -78,7 +78,11 @@ function ChatGPTQuery(props: Props) {
           <span className="cursor-pointer leading-[0]" onClick={openOptionsPage}>
             <GearIcon size={14} />
           </span>
-          <ChatGPTFeedback messageId={answer.messageId} conversationId={answer.conversationId} />
+          <ChatGPTFeedback
+            messageId={answer.messageId}
+            conversationId={answer.conversationId}
+            answerText={answer.text}
+          />
         </div>
         <ReactMarkdown rehypePlugins={[[rehypeHighlight, { detect: true }]]}>
           {answer.text}
