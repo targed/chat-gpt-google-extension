@@ -254,7 +254,9 @@
         "https://baresearch.org/search*",
         "https://priv.au/search*",
         "https://search.smnz.de/search*",
-        "https://searx.tuxcloud.net/search*"
+        "https://searx.tuxcloud.net/search*",
+        "https://qwant.com/search*",
+        "https://ecosia.org/search*"
       ],
       "js": ["content-script.js"],
       "css": ["content-script.css"]

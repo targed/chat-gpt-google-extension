@@ -69,7 +69,21 @@ export const config: Record<string, SearchEngine> = {
   },
   searx: {
     inputQuery: ["input[name='q']"],
-    sidebarContainerQuery: ['#sidebar_results'],
+    sidebarContainerQuery: ['#sidebar','#sidebar_results'],
+    appendContainerQuery: [],
+  },
+  qwant: {
+    inputQuery: ["input[name='q']"],
+    sidebarContainerQuery: ['._3McWE.is-sidebar','._2NDle.nt3hI'],
+    appendContainerQuery: [],
+    //sidebarContainerQuery: ['._2NDle.nt3hI/div'],
+    //appendContainerQuery: ['._3McWE.is-sidebar'],
+  },
+  ecosia: {
+    inputQuery: ["input[name='q']"],
+    sidebarContainerQuery: [],
     appendContainerQuery: [],
   },
 }
+// '.sidebar.web__sidebar', '#sidebar','#sidebar_results'
+//'._3McWE.is-sidebar/._2NDle.nt3hI', '#_3McWE is-sidebar','#is-sidebar','.is-sidebar','._3McWE.is-sidebar','#._3McWE.is-sidebar','#_3McWE.is-sidebar','#_2NDle.nt3hI','_2NDle nt3hI','_2NDle nt','._2NDle.nt3hI'
