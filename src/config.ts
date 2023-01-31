@@ -8,9 +8,15 @@ export enum TriggerMode {
 }
 
 export const TRIGGER_MODE_TEXT = {
-  [TriggerMode.Always]: 'Always',
-  [TriggerMode.QuestionMark]: 'When query ends with question mark (?)',
-  [TriggerMode.Manually]: 'Manually',
+  [TriggerMode.Always]: { title: 'Always', desc: 'ChatGPT is queried on every search' },
+  [TriggerMode.QuestionMark]: {
+    title: 'Question Mark',
+    desc: 'When your query ends with a question mark (?)',
+  },
+  [TriggerMode.Manually]: {
+    title: 'Manually',
+    desc: 'ChatGPT is queried when you manually click a button',
+  },
 }
 
 export enum Theme {
@@ -19,9 +25,22 @@ export enum Theme {
   Dark = 'dark',
 }
 
+export enum Language {
+  Auto = 'auto',
+  English = 'english',
+  Chinese = 'chinese',
+  Spanish = 'spanish',
+  French = 'french',
+  Korean = 'korean',
+  Japanese = 'japanese',
+  German = 'german',
+  Portuguese = 'portuguese',
+}
+
 const userConfigWithDefaultValue = {
   triggerMode: TriggerMode.Always,
   theme: Theme.Auto,
+  language: Language.Auto,
 }
 
 export type UserConfig = typeof userConfigWithDefaultValue

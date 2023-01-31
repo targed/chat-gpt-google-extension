@@ -1,14 +1,18 @@
 import archiver from 'archiver'
 import autoprefixer from 'autoprefixer'
+import * as dotenv from 'dotenv'
 import esbuild from 'esbuild'
 import postcssPlugin from 'esbuild-style-plugin'
-import fs, { promises as fsPromises } from 'fs'
+import fs from 'fs-extra'
+import process from 'node:process'
 import tailwindcss from 'tailwindcss'
+
+dotenv.config()
 
 const outdir = 'build'
 
 async function deleteOldDir() {
-  await fsPromises.rm(outdir, { recursive: true, force: true })
+  await fs.remove(outdir)
 }
 
 async function runEsbuild() {
@@ -17,13 +21,16 @@ async function runEsbuild() {
       'src/content-script/index.tsx',
       'src/background/index.ts',
       'src/options/index.tsx',
+      'src/popup/index.tsx',
     ],
     bundle: true,
     outdir: outdir,
     treeShaking: true,
     minify: true,
+    legalComments: 'none',
     define: {
       'process.env.NODE_ENV': '"production"',
+      'process.env.AXIOM_TOKEN': JSON.stringify(process.env.AXIOM_TOKEN || 'UNDEFINED'),
     },
     jsxFactory: 'h',
     jsxFragment: 'Fragment',
@@ -52,10 +59,10 @@ async function zipFolder(dir) {
 }
 
 async function copyFiles(entryPoints, targetDir) {
-  await fsPromises.mkdir(targetDir)
+  await fs.ensureDir(targetDir)
   await Promise.all(
     entryPoints.map(async (entryPoint) => {
-      await fsPromises.copyFile(entryPoint.src, `${targetDir}/${entryPoint.dst}`)
+      await fs.copy(entryPoint.src, `${targetDir}/${entryPoint.dst}`)
     }),
   )
 }
@@ -71,7 +78,11 @@ async function build() {
     { src: 'build/options/index.js', dst: 'options.js' },
     { src: 'build/options/index.css', dst: 'options.css' },
     { src: 'src/options/index.html', dst: 'options.html' },
+    { src: 'build/popup/index.js', dst: 'popup.js' },
+    { src: 'build/popup/index.css', dst: 'popup.css' },
+    { src: 'src/popup/index.html', dst: 'popup.html' },
     { src: 'src/logo.png', dst: 'logo.png' },
+    { src: 'src/_locales', dst: '_locales' },
   ]
 
   // chromium

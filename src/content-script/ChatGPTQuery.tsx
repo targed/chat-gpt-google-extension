@@ -7,10 +7,13 @@ import Browser from 'webextension-polyfill'
 import { captureEvent } from '../analytics'
 import { Answer } from '../messaging'
 import ChatGPTFeedback from './ChatGPTFeedback'
-import { isBraveBrowser, shouldShowTriggerModeTip } from './utils.js'
+import { isBraveBrowser, shouldShowRatingTip } from './utils.js'
+
+export type QueryStatus = 'success' | 'error' | undefined
 
 interface Props {
   question: string
+  onStatusChange?: (status: QueryStatus) => void
 }
 
 function ChatGPTQuery(props: Props) {
@@ -19,7 +22,11 @@ function ChatGPTQuery(props: Props) {
   const [retry, setRetry] = useState(0)
   const [done, setDone] = useState(false)
   const [showTip, setShowTip] = useState(false)
-  const [status, setStatus] = useState<'success' | 'error' | undefined>()
+  const [status, setStatus] = useState<QueryStatus>()
+
+  useEffect(() => {
+    props.onStatusChange?.(status)
+  }, [props, status])
 
   useEffect(() => {
     const port = Browser.runtime.connect()
@@ -57,12 +64,12 @@ function ChatGPTQuery(props: Props) {
   }, [error])
 
   useEffect(() => {
-    shouldShowTriggerModeTip().then((show) => setShowTip(show))
+    shouldShowRatingTip().then((show) => setShowTip(show))
   }, [])
 
   useEffect(() => {
-    if (status) {
-      captureEvent('showAnswer', { status })
+    if (status === 'success') {
+      captureEvent('show_answer', { host: location.host, language: navigator.language })
     }
   }, [props.question, status])
 
@@ -72,23 +79,31 @@ function ChatGPTQuery(props: Props) {
 
   if (answer) {
     return (
-      <div id="answer" className="markdown-body gpt-inner" dir="auto">
+      <div className="markdown-body gpt-markdown" id="gpt-answer" dir="auto">
         <div className="gpt-header">
           <span className="font-bold">ChatGPT</span>
           <span className="cursor-pointer leading-[0]" onClick={openOptionsPage}>
             <GearIcon size={14} />
           </span>
-          <ChatGPTFeedback messageId={answer.messageId} conversationId={answer.conversationId} />
+          <ChatGPTFeedback
+            messageId={answer.messageId}
+            conversationId={answer.conversationId}
+            answerText={answer.text}
+          />
         </div>
         <ReactMarkdown rehypePlugins={[[rehypeHighlight, { detect: true }]]}>
           {answer.text}
         </ReactMarkdown>
         {done && showTip && (
           <p className="italic mt-2">
-            Tip: you can switch to manual trigger mode in{' '}
-            <span className="underline cursor-pointer" onClick={openOptionsPage}>
-              extension settings
-            </span>
+            Enjoy this extension? Give us a 5-star rating at{' '}
+            <a
+              href="https://chatgpt4google.com/chrome?utm_source=rating_tip"
+              target="_blank"
+              rel="noreferrer"
+            >
+              Chrome Web Store
+            </a>
           </p>
         )}
       </div>
@@ -97,33 +112,43 @@ function ChatGPTQuery(props: Props) {
 
   if (error === 'UNAUTHORIZED' || error === 'CLOUDFLARE') {
     return (
-      <p className="gpt-inner">
+      <p>
         Please login and pass Cloudflare check at{' '}
         <a href="https://chat.openai.com" target="_blank" rel="noreferrer">
           chat.openai.com
         </a>
-        {isBraveBrowser() && retry > 0 && (
-          <span>
-            <br />
-            Still not working? Follow{' '}
-            <a href="https://github.com/wong2/chat-gpt-google-extension#troubleshooting">
-              Brave Troubleshooting
-            </a>
-          </span>
-        )}
+        {retry > 0 &&
+          (() => {
+            if (isBraveBrowser()) {
+              return (
+                <span className="block mt-2">
+                  Still not working? Follow{' '}
+                  <a href="https://github.com/wong2/chat-gpt-google-extension#troubleshooting">
+                    Brave Troubleshooting
+                  </a>
+                </span>
+              )
+            } else {
+              return (
+                <span className="italic block mt-2 text-xs">
+                  OpenAI requires passing a security check every once in a while.
+                </span>
+              )
+            }
+          })()}
       </p>
     )
   }
   if (error) {
     return (
-      <p className="gpt-inner">
+      <p>
         Failed to load response from ChatGPT:
-        <br /> {error}
+        <span className="break-all block">{error}</span>
       </p>
     )
   }
 
-  return <p className="gpt-loading gpt-inner">Waiting for ChatGPT response...</p>
+  return <p className="text-[#b6b8ba] animate-pulse">Waiting for ChatGPT response...</p>
 }
 
 export default memo(ChatGPTQuery)
